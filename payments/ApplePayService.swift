@@ -11,14 +11,14 @@ import PassKit
 protocol ApplePayServiceType: class {
     func isDeviceCompatible() -> Bool
     func isDeviceSetUp() -> Bool
-    func showPaymentSheet(viewCtrl: UIViewController, depositAmount: NSDecimalNumber)
+    func showPaymentSheet(viewCtrl: UIViewController, depositAmount: Float)
     func paymentButton() -> PKPaymentButton
 }
 
 class ApplePayService: NSObject, ApplePayServiceType {
     
     // MARK: Private vars
-    private let supportedPaymentNetworks: [PKPaymentNetwork] = [.amex, .visa, .masterCard]
+    private let supportedPaymentNetworks: [PKPaymentNetwork] = [.amex, .visa, .masterCard, .discover]
     
     // MARK: Public Methods
     func isDeviceCompatible() -> Bool {
@@ -33,7 +33,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
         var buttonStyle = PKPaymentButtonStyle.black
         if #available(iOS 12.0, *) {
             if UIScreen.main.traitCollection.userInterfaceStyle == UIUserInterfaceStyle.dark {
-                buttonStyle = .white
+                buttonStyle = .whiteOutline
             }
         }
         
@@ -45,7 +45,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
         return PKPaymentButton(paymentButtonType: buttonType, paymentButtonStyle: buttonStyle)
     }
     
-    func showPaymentSheet(viewCtrl: UIViewController, depositAmount: NSDecimalNumber) {
+    func showPaymentSheet(viewCtrl: UIViewController, depositAmount: Float) {
         if self.isDeviceSetUp() {
             let request = PKPaymentRequest()
             request.currencyCode = "USD"
@@ -53,7 +53,13 @@ class ApplePayService: NSObject, ApplePayServiceType {
             request.merchantIdentifier = "merchant.com.twinspires.test"
             request.merchantCapabilities = .capabilityCredit
             request.supportedNetworks = supportedPaymentNetworks
-            request.paymentSummaryItems = [PKPaymentSummaryItem.init(label: "Deposit Amount", amount: depositAmount)]
+            request.paymentSummaryItems = [
+                PKPaymentSummaryItem.init(label: "Deposit Amount", amount: NSDecimalNumber(value: depositAmount)),
+                PKPaymentSummaryItem.init(label: "Transaction Fees", amount: NSDecimalNumber(value: Float("5")!)),
+                PKPaymentSummaryItem.init(label: "TwinSpires", amount: NSDecimalNumber(value: Float(depositAmount + Float("5")!)))
+            ]
+            request.requiredBillingContactFields = [ PKContactField.postalAddress ]
+            
             
             guard let paymentCtrl = PKPaymentAuthorizationViewController(paymentRequest: request) else {
                 return
@@ -73,7 +79,6 @@ extension ApplePayService: PKPaymentAuthorizationViewControllerDelegate {
     }
     
     func paymentAuthorizationViewController(_ controller: PKPaymentAuthorizationViewController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-//        let token = payment.token
         controller.dismiss(animated: true, completion: nil)
     }
     

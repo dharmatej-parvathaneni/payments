@@ -41,8 +41,8 @@ class ViewController: UIViewController {
 //        let passLibrary = PKPassLibrary()
 //        passLibrary.openPaymentSetup()
         
-        let depositAmount = Float(amount.text!)
-        applePayService.showPaymentSheet(viewCtrl: self, depositAmount: NSDecimalNumber(value: depositAmount!))
+        let depAmt = Float(amount.text!)
+        applePayService.showPaymentSheet(viewCtrl: self, depositAmount: depAmt!)
     }
     
 }
