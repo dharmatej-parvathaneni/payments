@@ -1,2 +1,2 @@
 # payments
-Integrating Apple Pay in iOS App
+Integrating Apple Pay
