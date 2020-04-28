@@ -11,7 +11,7 @@ import PassKit
 protocol ApplePayServiceType: class {
     func isDeviceCompatible() -> Bool
     func isDeviceSetUp() -> Bool
-    func showPaymentSheet(viewCtrl: UIViewController, depositAmount: Float)
+    func showPaymentSheet(depositAmount: Float)
     func paymentButton() -> PKPaymentButton
 }
 
@@ -45,7 +45,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
         return PKPaymentButton(paymentButtonType: buttonType, paymentButtonStyle: buttonStyle)
     }
     
-    func showPaymentSheet(viewCtrl: UIViewController, depositAmount: Float) {
+    func showPaymentSheet(depositAmount: Float) {
         if self.isDeviceSetUp() {
             let request = PKPaymentRequest()
             request.currencyCode = "USD"
@@ -60,12 +60,9 @@ class ApplePayService: NSObject, ApplePayServiceType {
             ]
             request.requiredBillingContactFields = [ PKContactField.postalAddress ]
             
-            
-            guard let paymentCtrl = PKPaymentAuthorizationViewController(paymentRequest: request) else {
-                return
-            }
-            paymentCtrl.delegate = self
-            viewCtrl.present(paymentCtrl, animated: true, completion: nil)
+            let paymentRequest = PKPaymentAuthorizationController(paymentRequest: request)
+            paymentRequest.delegate = self
+            paymentRequest.present(completion: nil)
         } else {
             let passLib = PKPassLibrary()
             passLib.openPaymentSetup()
@@ -73,13 +70,12 @@ class ApplePayService: NSObject, ApplePayServiceType {
     }
 }
 
-extension ApplePayService: PKPaymentAuthorizationViewControllerDelegate {
-    func paymentAuthorizationViewControllerDidFinish(_ controller: PKPaymentAuthorizationViewController) {
-        controller.dismiss(animated: true, completion: nil)
+extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
+    func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
+        controller.dismiss(completion: nil)
     }
     
-    func paymentAuthorizationViewController(_ controller: PKPaymentAuthorizationViewController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        controller.dismiss(animated: true, completion: nil)
+    func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
+        controller.dismiss(completion: nil)
     }
-    
 }

@@ -42,7 +42,7 @@ class ViewController: UIViewController {
 //        passLibrary.openPaymentSetup()
         
         let depAmt = Float(amount.text!)
-        applePayService.showPaymentSheet(viewCtrl: self, depositAmount: depAmt!)
+        applePayService.showPaymentSheet(depositAmount: depAmt!)
     }
     
 }
