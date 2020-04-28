@@ -76,6 +76,6 @@ extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
     }
     
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        controller.dismiss(completion: nil)
+        completion(PKPaymentAuthorizationResult.init(status: PKPaymentAuthorizationStatus.success, errors: nil))
     }
 }
