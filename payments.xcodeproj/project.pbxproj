@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8E01142B2453FFE0004E0BC4 /* PassKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E458FDA2453E69400D4F157 /* PassKit.framework */; };
 		8E458FBD24536CB500D4F157 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E458FBC24536CB500D4F157 /* AppDelegate.swift */; };
 		8E458FC124536CB500D4F157 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E458FC024536CB500D4F157 /* ViewController.swift */; };
 		8E458FC424536CB500D4F157 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E458FC224536CB500D4F157 /* Main.storyboard */; };
@@ -36,7 +35,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E01142B2453FFE0004E0BC4 /* PassKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
