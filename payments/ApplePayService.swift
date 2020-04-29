@@ -17,6 +17,8 @@ protocol ApplePayServiceType: class {
 
 class ApplePayService: NSObject, ApplePayServiceType {
     
+    public static let appSvc = ApplePayService()
+    
     // MARK: Private vars
     private let supportedPaymentNetworks: [PKPaymentNetwork] = [.amex, .visa, .masterCard, .discover]
     
