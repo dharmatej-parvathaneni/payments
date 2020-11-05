@@ -61,6 +61,8 @@ class ViewController: UIViewController {
         
         if applePayService.isDeviceCompatible() {
             self.applePayButton = applePayService.paymentButton()
+            self.applePayButton.widthAnchor.constraint(equalToConstant: 150.0).isActive = true;
+            self.applePayButton.heightAnchor.constraint(equalToConstant: 50.0).isActive = true;
             self.applePayButton.addTarget(self, action: #selector(submitApplePay), for: .touchUpInside)
             self.applePayButton.translatesAutoresizingMaskIntoConstraints = false
             

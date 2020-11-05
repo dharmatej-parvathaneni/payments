@@ -28,7 +28,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
     }
     
     func isDeviceSetUp() -> Bool {
-        PKPaymentAuthorizationController.canMakePayments(usingNetworks: supportedPaymentNetworks, capabilities: .capabilityCredit)
+        PKPaymentAuthorizationController.canMakePayments(usingNetworks: supportedPaymentNetworks, capabilities: .capability3DS)
     }
     
     func paymentButton() -> PKPaymentButton {
@@ -52,15 +52,15 @@ class ApplePayService: NSObject, ApplePayServiceType {
             let request = PKPaymentRequest()
             request.currencyCode = "USD"
             request.countryCode = "US"
-            request.merchantIdentifier = "merchant.com.twinspires.test"
-            request.merchantCapabilities = .capabilityCredit
+            request.merchantIdentifier = Configuration.Merchant.identifier
+            request.merchantCapabilities = .capability3DS
             request.supportedNetworks = supportedPaymentNetworks
             request.paymentSummaryItems = [
                 PKPaymentSummaryItem.init(label: "Deposit Amount", amount: NSDecimalNumber(value: depositAmount)),
                 PKPaymentSummaryItem.init(label: "Transaction Fees", amount: NSDecimalNumber(value: Float("5")!)),
                 PKPaymentSummaryItem.init(label: "TwinSpires", amount: NSDecimalNumber(value: Float(depositAmount + Float("5")!)))
             ]
-            request.requiredBillingContactFields = [ PKContactField.postalAddress ]
+            request.requiredBillingContactFields = [ .postalAddress ]
             
             let paymentRequest = PKPaymentAuthorizationController(paymentRequest: request)
             paymentRequest.delegate = self
@@ -78,6 +78,8 @@ extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
     }
     
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
+        print("\(#function) Triggerd,  paymentToken: \(payment.token.paymentData.base64EncodedString()), paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName)), Address1: \(String(describing: payment.billingContact?.postalAddress?.street)), City: \(String(describing: payment.billingContact?.postalAddress?.city)), State: \(String(describing: payment.billingContact?.postalAddress?.state)), ZipCode: \(String(describing: payment.billingContact?.postalAddress?.postalCode)), transactionIdentifier: \(String(describing: payment.token.transactionIdentifier))")
+        
         completion(PKPaymentAuthorizationResult.init(status: PKPaymentAuthorizationStatus.success, errors: nil))
     }
 }
