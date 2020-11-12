@@ -7,33 +7,88 @@
 //
 
 import UIKit
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    let gcmMessageIDKey = "gcm.message_id"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // Configure FirebaseApp
+        FirebaseApp.configure()
+        
+        // Delegates for Messaging and Notifications
+        Messaging.messaging().delegate = self
+        
+        
+        // Request Notification Permissions from Device User.
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+           options: authOptions,
+           completionHandler: {_, _ in })
+        
+        application.registerForRemoteNotifications()
+        
         return true
     }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) {
+        if let messageID = userInfo[gcmMessageIDKey] {
+            print("didReceiveRemoteNotification Message ID: \(messageID)")
+            Messaging.messaging().appDidReceiveMessage(userInfo)
+        }
 
-    // MARK: UISceneSession Lifecycle
-
-    @available(iOS 13.0, *)
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        // Print full message.
+        print(userInfo)
     }
+    
+    // Declare below to receive FIRMessaging messages
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                       fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        if let messageID = userInfo[gcmMessageIDKey] {
+            print("didReceiveRemoteNotification fetchCompletionHandler Message ID: \(messageID)")
+            Messaging.messaging().appDidReceiveMessage(userInfo)
+        }
 
-    @available(iOS 13.0, *)
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+        // Print full message.
+        print(userInfo)
+        
+        // Send Notification to ViewController
+        if application.applicationState == .active {
+            NotificationCenter.default.post(name: Notification.Name("DataMsgBackEnd"), object: nil, userInfo: userInfo)
+        }
+        
+        completionHandler(.newData)
     }
-
+    
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("Unable to register for remote notifications: \(error.localizedDescription)")
+    }
+    
+    // set APNSToken
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("APNs token retrieved: \(String(describing: deviceToken))")
+        
+        // With swizzling disabled you must set the APNs token here.
+        Messaging.messaging().apnsToken = deviceToken
+    }
 }
 
+extension AppDelegate : MessagingDelegate {
+
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+
+        print("Firebase registration token: \(String(describing: fcmToken))")
+
+        let dataDict:[String: String] = ["token": fcmToken ]
+
+        NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
+        // TODO: If necessary send token to application server.
+        // Note: This callback is fired at each app startup and whenever a new token is generated.
+  }
+
+}

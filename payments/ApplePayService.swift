@@ -7,28 +7,29 @@
 //
 
 import PassKit
+import Firebase
 
 protocol ApplePayServiceType: class {
     func isDeviceCompatible() -> Bool
-    func isDeviceSetUp() -> Bool
     func showPaymentSheet(depositAmount: Float)
     func paymentButton() -> PKPaymentButton
+    func subscribeToTopic(topic: String) -> Void
+    func unSubscribeFromTopic(timeout: Bool?) -> Void
 }
 
 class ApplePayService: NSObject, ApplePayServiceType {
     
+    // MARK: Public vars/constants
     public static let appSvc = ApplePayService()
     
     // MARK: Private vars
-    private let supportedPaymentNetworks: [PKPaymentNetwork] = [.amex, .visa, .masterCard, .discover]
+    private let supportedPaymentNetworks: [PKPaymentNetwork] = [.visa, .masterCard]
+    
+    private var topicName: String = ""
     
     // MARK: Public Methods
     func isDeviceCompatible() -> Bool {
         PKPaymentAuthorizationController.canMakePayments()
-    }
-    
-    func isDeviceSetUp() -> Bool {
-        PKPaymentAuthorizationController.canMakePayments(usingNetworks: supportedPaymentNetworks, capabilities: .capability3DS)
     }
     
     func paymentButton() -> PKPaymentButton {
@@ -40,7 +41,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
         }
         
         var buttonType = PKPaymentButtonType.setUp
-        if self.isDeviceSetUp() {
+        if self.isDeviceCompatible() {
             buttonType = .plain
         }
         
@@ -48,7 +49,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
     }
     
     func showPaymentSheet(depositAmount: Float) {
-        if self.isDeviceSetUp() {
+        if self.isDeviceCompatible() {
             let request = PKPaymentRequest()
             request.currencyCode = "USD"
             request.countryCode = "US"
@@ -70,6 +71,26 @@ class ApplePayService: NSObject, ApplePayServiceType {
             passLib.openPaymentSetup()
         }
     }
+    
+    func subscribeToTopic(topic: String) -> Void {
+        self.topicName = topic
+        Messaging.messaging().subscribe(toTopic: self.topicName) { error in
+          print("Subscribed to ApplePayDeposit topic")
+        }
+    }
+    
+    func unSubscribeFromTopic(timeout: Bool? = false) -> Void {
+        if (self.topicName != "") {
+            Messaging.messaging().unsubscribe(fromTopic: self.topicName) { error in
+                if timeout! {
+                    print("UN-Subscribed from topic due to timeout")
+                } else {
+                    print("UN-Subscribed from ApplePayDeposit topic")
+                }
+                self.topicName = ""
+            }
+        }
+    }
 }
 
 extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
@@ -78,7 +99,13 @@ extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
     }
     
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        print("\(#function) Triggerd,  paymentToken: \(payment.token.paymentData.base64EncodedString()), paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName)), Address1: \(String(describing: payment.billingContact?.postalAddress?.street)), City: \(String(describing: payment.billingContact?.postalAddress?.city)), State: \(String(describing: payment.billingContact?.postalAddress?.state)), ZipCode: \(String(describing: payment.billingContact?.postalAddress?.postalCode)), transactionIdentifier: \(String(describing: payment.token.transactionIdentifier))")
+        print("\(#function) Triggerd,  paymentToken: \(payment.token.paymentData), paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName)), Address1: \(String(describing: payment.billingContact?.postalAddress?.street)), City: \(String(describing: payment.billingContact?.postalAddress?.city)), State: \(String(describing: payment.billingContact?.postalAddress?.state)), ZipCode: \(String(describing: payment.billingContact?.postalAddress?.postalCode)), transactionIdentifier: \(String(describing: payment.token.transactionIdentifier))")
+        
+        // Retrieve the TransactionID and Subscribe to Topic - self.topicName
+        self.subscribeToTopic(topic: payment.token.transactionIdentifier)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
+            self.unSubscribeFromTopic(timeout: true)
+        }
         
         completion(PKPaymentAuthorizationResult.init(status: PKPaymentAuthorizationStatus.success, errors: nil))
     }
