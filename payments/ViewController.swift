@@ -3,7 +3,7 @@
 //  Payments
 //
 //  Created by Dharmatej Parvathaneni on 4/24/20.
-//  Copyright © 2020 https://github.com/dharmatej-parvathaneni. All rights reserved.
+//  Copyright © 2020 https://github.com/dharmatej-parvathaneni . All rights reserved.
 //
 
 import UIKit
