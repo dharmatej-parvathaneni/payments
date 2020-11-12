@@ -27,6 +27,8 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         NSLog("ViewController: viewDidLoad..!!!")
         
+//        self.fcmTokenMessage.isHidden = true
+        
         // Listener to identify the token refresh
         NotificationCenter.default.addObserver(self, selector: #selector(self.displayFCMToken(notification:)), name: Notification.Name("FCMToken"), object: nil)
         

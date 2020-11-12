@@ -99,14 +99,18 @@ extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
     }
     
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        print("\(#function) Triggerd,  paymentToken: \(payment.token.paymentData), paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName)), Address1: \(String(describing: payment.billingContact?.postalAddress?.street)), City: \(String(describing: payment.billingContact?.postalAddress?.city)), State: \(String(describing: payment.billingContact?.postalAddress?.state)), ZipCode: \(String(describing: payment.billingContact?.postalAddress?.postalCode)), transactionIdentifier: \(String(describing: payment.token.transactionIdentifier))")
+        print("\(#function) Triggerd,  \n\n paymentToken: \(payment.token.paymentData), \n paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName)), \n Address1: \(String(describing: payment.billingContact?.postalAddress?.street)), \n City: \(String(describing: payment.billingContact?.postalAddress?.city)), \n State: \(String(describing: payment.billingContact?.postalAddress?.state)), \n ZipCode: \(String(describing: payment.billingContact?.postalAddress?.postalCode)), \n transactionIdentifier: \(String(describing: payment.token.transactionIdentifier)) \n\n")
         
         // Retrieve the TransactionID and Subscribe to Topic - self.topicName
-        self.subscribeToTopic(topic: payment.token.transactionIdentifier)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
-            self.unSubscribeFromTopic(timeout: true)
+        var status: PKPaymentAuthorizationStatus = .failure
+        if !payment.token.transactionIdentifier.contains("Simulated") {
+            self.subscribeToTopic(topic: payment.token.transactionIdentifier)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
+                self.unSubscribeFromTopic(timeout: true)
+            }
+            status = .success
         }
         
-        completion(PKPaymentAuthorizationResult.init(status: PKPaymentAuthorizationStatus.success, errors: nil))
+        completion(PKPaymentAuthorizationResult.init(status: status, errors: nil))
     }
 }
