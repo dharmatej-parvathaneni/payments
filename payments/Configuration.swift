@@ -3,7 +3,7 @@
 //  payments
 //
 //  Created by Dharmatej Parvathaneni on 11/5/20.
-//  Copyright © 2020 twinspires. All rights reserved.
+//  Copyright © 2020 https://github.com/dharmatej-parvathaneni. All rights reserved.
 //
 
 import Foundation
