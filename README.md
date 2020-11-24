@@ -1,2 +1,3 @@
 # payments
-Integrating Apple Pay
+- ApplePay Integration with Vendor System
+- Firebase Cloud Messaging intergration receiving notifications from BackEnd
