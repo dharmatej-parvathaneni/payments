@@ -23,7 +23,7 @@ class ApplePayService: NSObject, ApplePayServiceType {
     public static let appSvc = ApplePayService()
     
     // MARK: Private vars
-    private let supportedPaymentNetworks: [PKPaymentNetwork] = [.visa, .masterCard]
+    private let supportedPaymentNetworks: [PKPaymentNetwork] = [.visa, .masterCard, .amex]
     
     private var topicName: String = ""
     
@@ -99,7 +99,24 @@ extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
     }
     
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        print("\(#function) Triggerd,  \n\n paymentToken: \(payment.token.paymentData), \n paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName)), \n Address1: \(String(describing: payment.billingContact?.postalAddress?.street)), \n City: \(String(describing: payment.billingContact?.postalAddress?.city)), \n State: \(String(describing: payment.billingContact?.postalAddress?.state)), \n ZipCode: \(String(describing: payment.billingContact?.postalAddress?.postalCode)), \n transactionIdentifier: \(String(describing: payment.token.transactionIdentifier)) \n\n")
+       
+        var tokenData: ApplePayTokenData?
+        do {
+            tokenData = try JSONDecoder().decode(ApplePayTokenData.self, from: payment.token.paymentData)
+        } catch {
+            print("Error capturing Data: \(error.localizedDescription).")
+        }
+        
+        print("\(#function) Triggerd,  Version: \(String(describing: tokenData!.version))")
+        print("Data: \(String(describing: tokenData!.data))")
+        print("Signature: \(String(describing: tokenData!.signature))")
+        print("Header: \(String(describing: tokenData!.header))")
+        print("paymentDisplayName: \(String(describing: payment.token.paymentMethod.displayName!))")
+        print("Address1: \(String(describing: payment.billingContact!.postalAddress!.street))")
+        print("City: \(String(describing: payment.billingContact!.postalAddress!.city))")
+        print("State: \(String(describing: payment.billingContact!.postalAddress!.state))")
+        print("ZipCode: \(String(describing: payment.billingContact!.postalAddress!.postalCode))")
+        print("transactionIdentifier: \(String(describing: payment.token.transactionIdentifier))")
         
         // Retrieve the TransactionID and Subscribe to Topic - self.topicName
         var status: PKPaymentAuthorizationStatus = .failure
@@ -113,4 +130,18 @@ extension ApplePayService: PKPaymentAuthorizationControllerDelegate {
         
         completion(PKPaymentAuthorizationResult.init(status: status, errors: nil))
     }
+}
+
+
+struct ApplePayTokenData: Decodable {
+    let version: String
+    let data: String
+    let signature: String
+    let header: ApplePayTokenDataHeader
+}
+
+struct ApplePayTokenDataHeader: Decodable {
+    let ephemeralPublicKey: String
+    let publicKeyHash: String
+    let transactionId: String
 }
