@@ -31,10 +31,18 @@ class ViewController: UIViewController {
 //        self.fcmTokenMessage.isHidden = true
         
         // Listener to identify the token refresh
-        NotificationCenter.default.addObserver(self, selector: #selector(self.displayFCMToken(notification:)), name: Notification.Name("FCMToken"), object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.displayFCMToken(notification:)),
+            name: Notification.Name("FCMToken"),
+            object: nil)
         
         // Listener to read the Background Notification Data
-        NotificationCenter.default.addObserver(self, selector: #selector(self.displayNotificationData(notification:)), name: Notification.Name("DataMsgBackEnd"), object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.displayNotificationData(notification:)),
+            name: Notification.Name("DataMsgBackEnd"),
+            object: nil)
         
         // Create Payment Button
         self.createPaymentButton()
@@ -44,12 +52,26 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         NSLog("View Did Appear")
         
-        NotificationCenter.default.addObserver(self, selector: #selector(appEnteredForeGround(_:)), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appEnteredForeGround(_:)),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil)
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        NSLog("View Will Appear")
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appBecomeActive(_:)),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        NSLog("View DID  Disappear")
+        NSLog("View Will Disappear")
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -62,6 +84,16 @@ class ViewController: UIViewController {
     @objc func appEnteredForeGround(_ notification: Notification) {
         NSLog("appEnteredForeGround() Called....!!")
         self.createPaymentButton()
+    }
+    
+    @objc func appBecomeActive(_ notification: Notification) {
+        NSLog("appBecomeActive() Called....!!")
+        
+        let userDefaults = UserDefaults.standard
+        if let userInfo = userDefaults.object(forKey: "DataMsg") {
+            NotificationCenter.default.post(name: Notification.Name("DataMsgBackEnd"), object: nil, userInfo: userInfo as! [AnyHashable : Any])
+            userDefaults.removeObject(forKey: "DataMsg")
+        }
     }
     
     @objc func displayFCMToken(notification: NSNotification) {

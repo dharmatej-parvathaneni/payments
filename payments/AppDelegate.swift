@@ -58,8 +58,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print(userInfo)
         
         // Send Notification to ViewController
-        if application.applicationState == .active {
-            NotificationCenter.default.post(name: Notification.Name("DataMsgBackEnd"), object: nil, userInfo: userInfo)
+        switch application.applicationState {
+            case .active:
+                NotificationCenter.default.post(name: Notification.Name("DataMsgBackEnd"), object: nil, userInfo: userInfo)
+                break;
+            case .inactive:
+                UserDefaults.standard.set(userInfo, forKey: "DataMsg")
+                break;
+            case .background:
+                UserDefaults.standard.set(userInfo, forKey: "DataMsg")
+                break;
+            @unknown default:
+                print("unknow state identified")
         }
         
         completionHandler(.newData)

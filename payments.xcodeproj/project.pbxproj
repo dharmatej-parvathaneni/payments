@@ -34,7 +34,7 @@
 		8E458FD5245379ED00D4F157 /* ApplePayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayService.swift; sourceTree = "<group>"; };
 		8E458FD72453C3A500D4F157 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		8E458FDA2453E69400D4F157 /* PassKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PassKit.framework; path = System/Library/Frameworks/PassKit.framework; sourceTree = SDKROOT; };
-		8EA05AFE255B1DBB007E4781 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Documents/ApplePay/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		8EA05AFE255B1DBB007E4781 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "/Users/d.parvathaneni/Documents/ApplePay/GoogleService-Info.plist"; sourceTree = "<absolute>"; };
 		8EDC1A6C2554872C0000B9B8 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		FB3C0698E669C0C00890E331 /* Pods_payments.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_payments.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
